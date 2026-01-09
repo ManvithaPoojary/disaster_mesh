@@ -21,10 +21,14 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
-    <!-- Wi-Fi and Nearby (13+) -->
+    <!-- WiFi Direct -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <!-- Android 13+ requirement for WiFi Direct -->
+    <uses-permission
+        android:name="android.permission.NEARBY_WIFI_DEVICES"
+        android:usesPermissionFlags="neverForLocation" />
 
     <!-- Foreground service for mesh relaying -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -64,6 +68,12 @@
         <!-- Mesh relay foreground service -->
         <service
             android:name=".mesh.MeshService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <!-- Simple mesh service (Bluetooth Classic) -->
+        <service
+            android:name=".mesh.SimpleMeshService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 

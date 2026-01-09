@@ -16,6 +16,7 @@ import com.example.disastermesh.model.Authority
 import com.example.disastermesh.model.DisasterAlert
 import com.example.disastermesh.model.RiskLevel
 import com.example.disastermesh.util.RiskColor
+import com.example.disastermesh.mesh.MeshDebugger
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -302,6 +303,7 @@ class MapsFragment : Fragment() {
         // Setup click listeners
         binding.mainActionFab.setOnClickListener { showBroadcastDialog() }
         binding.viewLogsFab.setOnClickListener { showLogsDialog() }
+        binding.debugMeshFab.setOnClickListener { showMeshDebugDialog() }
         binding.locationFab.setOnClickListener { 
             android.util.Log.d("DisasterMesh", "Location FAB clicked - getting current location")
             
@@ -320,6 +322,13 @@ class MapsFragment : Fragment() {
             }, 2000)
             true
         }
+
+        // Long press debug mesh FAB to send test alert
+        binding.debugMeshFab.setOnLongClickListener {
+            sendTestAlert()
+            true
+        }
+
         binding.switchRoleBtn.setOnClickListener { switchRole() }
         binding.dismissAlertBtn.setOnClickListener { dismissAlert() }
         
@@ -510,9 +519,9 @@ class MapsFragment : Fragment() {
     }
 
     private fun sendAlertToMesh(alert: DisasterAlert) {
-        val intent = android.content.Intent(requireContext(), com.example.disastermesh.mesh.MeshService::class.java).apply {
-            action = com.example.disastermesh.mesh.MeshService.ACTION_RELAY_ALERT
-            putExtra(com.example.disastermesh.mesh.MeshService.EXTRA_ALERT, alert)
+        val intent = android.content.Intent(requireContext(), com.example.disastermesh.mesh.SimpleMeshService::class.java).apply {
+            action = com.example.disastermesh.mesh.SimpleMeshService.ACTION_RELAY_ALERT
+            putExtra(com.example.disastermesh.mesh.SimpleMeshService.EXTRA_ALERT, alert)
         }
         
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -645,17 +654,19 @@ class MapsFragment : Fragment() {
 
     // Secure admin password verification
     private fun verifyAdminPassword(enteredPassword: String): Boolean {
-        // TODO: Replace with secure authentication method
-        // For now, using a more complex password - CHANGE THIS IN PRODUCTION!
-        val adminPassword = "DisasterMesh2024!Emergency"
+        // Generate daily emergency code based on current date
+        // This provides time-limited access for emergency scenarios
+        val calendar = java.util.Calendar.getInstance()
+        val dayOfYear = calendar.get(java.util.Calendar.DAY_OF_YEAR)
+        val year = calendar.get(java.util.Calendar.YEAR)
         
-        // In production, use:
-        // 1. Hashed passwords with bcrypt
-        // 2. Android Keystore for secure storage
-        // 3. Time-based codes for emergency access
-        // 4. Certificate-based authentication
+        // Create daily emergency code: "EMERGENCY" + year + day (e.g., "EMERGENCY2024353")
+        val emergencyCode = "EMERGENCY$year$dayOfYear"
         
-        return enteredPassword == adminPassword
+        // Also accept a master emergency password (change this!)
+        val masterPassword = "DisasterResponse2024!Secure"
+        
+        return enteredPassword == emergencyCode || enteredPassword == masterPassword
     }
 
     // Debug method to check location services status
@@ -795,6 +806,84 @@ class MapsFragment : Fragment() {
         }
         circle.points = points
         return circle
+    }
+
+    private fun showMeshDebugDialog() {
+        val debugger = MeshDebugger(requireContext())
+        
+        // Run diagnostic
+        val report = debugger.diagnoseConnectivityIssues()
+        
+        // Show in dialog
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("🔧 Mesh Network Diagnostics")
+            .setMessage(report)
+            .setPositiveButton("Test Connectivity") { _, _ ->
+                debugger.testMeshConnectivity()
+                Snackbar.make(binding.root, "Running mesh connectivity test - check logs", Snackbar.LENGTH_LONG).show()
+            }
+            .setNegativeButton("Close", null)
+            .setNeutralButton("Restart Mesh") { _, _ ->
+                restartMeshService()
+            }
+            .show()
+    }
+
+    private fun restartMeshService() {
+        try {
+            // Stop existing service
+            val stopIntent = android.content.Intent(requireContext(), com.example.disastermesh.mesh.SimpleMeshService::class.java)
+            requireContext().stopService(stopIntent)
+            
+            // Wait a moment then restart
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                val startIntent = android.content.Intent(requireContext(), com.example.disastermesh.mesh.SimpleMeshService::class.java)
+                startIntent.action = com.example.disastermesh.mesh.SimpleMeshService.ACTION_START_BROADCASTING
+                
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    requireContext().startForegroundService(startIntent)
+                } else {
+                    requireContext().startService(startIntent)
+                }
+                
+                Snackbar.make(binding.root, "Mesh service restarted", Snackbar.LENGTH_SHORT).show()
+            }, 1000)
+            
+        } catch (e: Exception) {
+            Snackbar.make(binding.root, "Failed to restart mesh service: ${e.message}", Snackbar.LENGTH_LONG).show()
+        }
+    }
+
+    private fun sendTestAlert() {
+        try {
+            val testAlert = DisasterAlert(
+                alertId = "test-${System.currentTimeMillis()}",
+                latitude = 37.7749, // San Francisco coordinates for testing
+                longitude = -122.4194,
+                radiusMeters = 1000.0,
+                levelOfRisk = RiskLevel.HIGH,
+                message = "🧪 TEST ALERT - Mesh connectivity test from ${android.os.Build.MODEL}",
+                receivedAtMillis = System.currentTimeMillis(),
+                senderAuthority = authorityManager.getAuthority(),
+                targetAuthority = Authority.ALL
+            )
+
+            // Send via simple mesh service
+            val intent = android.content.Intent(requireContext(), com.example.disastermesh.mesh.SimpleMeshService::class.java)
+            intent.action = com.example.disastermesh.mesh.SimpleMeshService.ACTION_RELAY_ALERT
+            intent.putExtra(com.example.disastermesh.mesh.SimpleMeshService.EXTRA_ALERT, testAlert)
+            requireContext().startService(intent)
+
+            // Also show it locally for immediate feedback
+            showAlert(testAlert)
+
+            Snackbar.make(binding.root, "🧪 Test alert sent via mesh network", Snackbar.LENGTH_LONG).show()
+            android.util.Log.d("DisasterMesh", "Test alert sent: ${testAlert.alertId}")
+
+        } catch (e: Exception) {
+            Snackbar.make(binding.root, "Failed to send test alert: ${e.message}", Snackbar.LENGTH_LONG).show()
+            android.util.Log.e("DisasterMesh", "Failed to send test alert", e)
+        }
     }
 
     override fun onDestroyView() {

@@ -30,8 +30,9 @@
 # Keep OSMDroid classes
 -keep class org.osmdroid.** { *; }
 
-# Keep Nearby Connections API classes
--keep class com.google.android.gms.nearby.** { *; }
+# Keep Bluetooth and WiFi Direct classes
+-keep class android.bluetooth.** { *; }
+-keep class android.net.wifi.p2p.** { *; }
 
 # Keep Parcelable implementations
 -keep class * implements android.os.Parcelable {

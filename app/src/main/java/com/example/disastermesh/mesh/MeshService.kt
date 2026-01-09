@@ -162,8 +162,11 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
+import android.net.wifi.p2p.WifiP2pDevice
+import android.net.wifi.p2p.WifiP2pGroup
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -174,24 +177,22 @@ import com.example.disastermesh.logging.AlertLog
 import com.example.disastermesh.model.Authority
 import com.example.disastermesh.model.DisasterAlert
 import com.example.disastermesh.util.AlertCodec
-import com.google.android.gms.nearby.Nearby
-import com.google.android.gms.nearby.connection.*
 
-class MeshService : Service() {
+class MeshService : Service(), BluetoothLeManager.BluetoothLeCallback, WiFiDirectManager.WiFiDirectCallback {
     companion object {
         const val ACTION_RELAY_ALERT = "ACTION_RELAY_ALERT"
         const val ACTION_START_BROADCASTING = "ACTION_START_BROADCASTING"
         const val EXTRA_ALERT = "EXTRA_ALERT"
-        private const val SERVICE_ID = "com.example.disastermesh.mesh"
         private const val CHANNEL_ID = "mesh"
     }
 
-    private val connections by lazy { Nearby.getConnectionsClient(this) }
-    private val connectedEndpoints = mutableSetOf<String>()
-    private val discoveredEndpoints = mutableSetOf<String>()
+    private lateinit var bluetoothLeManager: BluetoothLeManager
+    private lateinit var wifiDirectManager: WiFiDirectManager
+    private val discoveredBluetoothDevices = mutableSetOf<BluetoothDevice>()
+    private val discoveredWiFiDevices = mutableSetOf<WifiP2pDevice>()
     private var currentAlert: DisasterAlert? = null
-    private var isAdvertising = false
-    private var isDiscovering = false
+    private var isBluetoothActive = false
+    private var isWiFiDirectActive = false
     private lateinit var authorityManager: AuthorityManager
 
     // Unique device identifier for the mesh network
@@ -202,10 +203,15 @@ class MeshService : Service() {
     override fun onCreate() {
         super.onCreate()
         authorityManager = AuthorityManager(this)
+        
+        // Initialize managers
+        bluetoothLeManager = BluetoothLeManager(this, this)
+        wifiDirectManager = WiFiDirectManager(this, this)
+        
         startForeground(1, buildNotification())
 
         // Auto-start mesh network on service creation
-        startAdvertisingAndDiscovery()
+        startMeshNetworking()
 
         AlertLog.d("MeshService created - Broadcasting as: $deviceName")
     }
@@ -221,14 +227,14 @@ class MeshService : Service() {
             }
             ACTION_START_BROADCASTING -> {
                 // Ensure mesh network is active
-                if (!isAdvertising || !isDiscovering) {
-                    startAdvertisingAndDiscovery()
+                if (!isBluetoothActive || !isWiFiDirectActive) {
+                    startMeshNetworking()
                 }
             }
             else -> {
                 // Default action: ensure mesh is running
-                if (!isAdvertising || !isDiscovering) {
-                    startAdvertisingAndDiscovery()
+                if (!isBluetoothActive || !isWiFiDirectActive) {
+                    startMeshNetworking()
                 }
             }
         }
@@ -249,12 +255,11 @@ class MeshService : Service() {
             )
         }
 
+        val totalDevices = discoveredBluetoothDevices.size + discoveredWiFiDevices.size
         val statusText = when {
-            connectedEndpoints.isNotEmpty() ->
-                "Connected: ${connectedEndpoints.size} device(s)"
-            discoveredEndpoints.isNotEmpty() ->
-                "Nearby: ${discoveredEndpoints.size} device(s)"
-            isAdvertising ->
+            totalDevices > 0 ->
+                "Nearby: $totalDevices device(s) (BT: ${discoveredBluetoothDevices.size}, WiFi: ${discoveredWiFiDevices.size})"
+            isBluetoothActive || isWiFiDirectActive ->
                 "Broadcasting - Visible to nearby devices"
             else ->
                 "Starting mesh network..."
@@ -274,147 +279,161 @@ class MeshService : Service() {
         nm.notify(1, buildNotification())
     }
 
-    private fun startAdvertisingAndDiscovery() {
-        val strategy = Strategy.P2P_CLUSTER
-
-        // Start advertising to make device visible
-        if (!isAdvertising) {
-            connections.startAdvertising(
-                deviceName,
-                SERVICE_ID,
-                connectionLifecycle,
-                AdvertisingOptions.Builder()
-                    .setStrategy(strategy)
-                    .build()
-            ).addOnSuccessListener {
-                isAdvertising = true
-                AlertLog.d("Successfully started advertising as: $deviceName")
-                AlertLog.append(this@MeshService, "Advertising as $deviceName")
-                updateNotification()
-            }.addOnFailureListener { e ->
-                AlertLog.e("Failed to start advertising: ${e.message}")
-                AlertLog.append(this@MeshService, "Failed to advertise: ${e.message}")
-                // Retry after 3 seconds
-                android.os.Handler(mainLooper).postDelayed({
-                    startAdvertisingAndDiscovery()
-                }, 3000)
+    private fun startMeshNetworking() {
+        // Start Bluetooth LE for device discovery
+        if (bluetoothLeManager.isBluetoothEnabled() && bluetoothLeManager.isBluetoothLeSupported()) {
+            if (bluetoothLeManager.startAdvertising()) {
+                AlertLog.d("Bluetooth LE advertising started")
+                AlertLog.append(this, "BLE advertising started")
             }
+            
+            if (bluetoothLeManager.startScanning()) {
+                AlertLog.d("Bluetooth LE scanning started")
+                AlertLog.append(this, "BLE scanning started")
+            }
+        } else {
+            AlertLog.e("Bluetooth LE not available")
         }
 
-        // Start discovery to find other devices
-        if (!isDiscovering) {
-            connections.startDiscovery(
-                SERVICE_ID,
-                discoveryCallback,
-                DiscoveryOptions.Builder()
-                    .setStrategy(strategy)
-                    .build()
-            ).addOnSuccessListener {
-                isDiscovering = true
-                AlertLog.d("Successfully started discovery")
-                AlertLog.append(this@MeshService, "Discovery started")
-            }.addOnFailureListener { e ->
-                AlertLog.e("Failed to start discovery: ${e.message}")
-                AlertLog.append(this@MeshService, "Failed discovery: ${e.message}")
+        // Initialize WiFi Direct for data transfer
+        if (wifiDirectManager.initialize()) {
+            if (wifiDirectManager.startDiscovery()) {
+                AlertLog.d("WiFi Direct discovery started")
+                AlertLog.append(this, "WiFi Direct discovery started")
             }
+        } else {
+            AlertLog.e("WiFi Direct not available")
         }
     }
 
-    private val payloadCallback = object : PayloadCallback() {
-        override fun onPayloadReceived(endpointId: String, payload: Payload) {
-            val bytes = payload.asBytes() ?: return
-            val alert = AlertCodec.decode(bytes) ?: return
-            handleIncomingAlert(alert)
-        }
+    // Bluetooth LE Callbacks
+    override fun onDeviceDiscovered(device: BluetoothDevice, deviceName: String) {
+        discoveredBluetoothDevices.add(device)
+        AlertLog.d("Discovered Bluetooth device: $deviceName")
+        AlertLog.append(this, "BLE device found: $deviceName")
+        updateNotification()
+        
+        // Try to establish WiFi Direct connection for data transfer
+        tryWiFiDirectConnection(device)
+    }
 
-        override fun onPayloadTransferUpdate(endpointId: String, update: PayloadTransferUpdate) {
-            if (update.status == PayloadTransferUpdate.Status.SUCCESS) {
-                AlertLog.d("Payload transfer successful to $endpointId")
-            }
+    override fun onDeviceLost(device: BluetoothDevice) {
+        discoveredBluetoothDevices.remove(device)
+        AlertLog.d("Lost Bluetooth device: ${device.address}")
+        updateNotification()
+    }
+
+    override fun onAdvertisingStarted() {
+        isBluetoothActive = true
+        updateNotification()
+    }
+
+    override fun onAdvertisingFailed(errorCode: Int) {
+        AlertLog.e("Bluetooth advertising failed: $errorCode")
+        // Retry after delay
+        android.os.Handler(mainLooper).postDelayed({
+            bluetoothLeManager.startAdvertising()
+        }, 5000)
+    }
+
+    override fun onScanStarted() {
+        // Scanning started successfully
+    }
+
+    override fun onScanFailed(errorCode: Int) {
+        AlertLog.e("Bluetooth scan failed: $errorCode")
+        // Retry after delay
+        android.os.Handler(mainLooper).postDelayed({
+            bluetoothLeManager.startScanning()
+        }, 5000)
+    }
+
+    // WiFi Direct Callbacks
+    override fun onPeersChanged(peers: List<WifiP2pDevice>) {
+        discoveredWiFiDevices.clear()
+        discoveredWiFiDevices.addAll(peers)
+        AlertLog.d("WiFi Direct peers updated: ${peers.size} devices")
+        AlertLog.append(this, "WiFi peers: ${peers.size}")
+        updateNotification()
+        
+        // Auto-connect to first available peer for mesh networking
+        peers.firstOrNull()?.let { peer ->
+            wifiDirectManager.connectToPeer(peer)
         }
     }
 
-    private val connectionLifecycle = object : ConnectionLifecycleCallback() {
-        override fun onConnectionInitiated(endpointId: String, connectionInfo: ConnectionInfo) {
-            AlertLog.d("Connection initiated with: ${connectionInfo.endpointName}")
-            // Auto-accept all connections for emergency mesh
-            connections.acceptConnection(endpointId, payloadCallback)
-                .addOnSuccessListener {
-                    AlertLog.d("Accepted connection from ${connectionInfo.endpointName}")
-                }
-                .addOnFailureListener { e ->
-                    AlertLog.e("Failed to accept connection: ${e.message}")
-                }
+    override fun onConnectionChanged(isConnected: Boolean, groupInfo: WifiP2pGroup?) {
+        isWiFiDirectActive = isConnected
+        if (isConnected) {
+            AlertLog.d("WiFi Direct connected - Group: ${groupInfo?.networkName}")
+            AlertLog.append(this, "WiFi connected: ${groupInfo?.networkName}")
+            
+            // Send current alert if available
+            currentAlert?.let { relayAlert(it) }
+        } else {
+            AlertLog.d("WiFi Direct disconnected")
+            AlertLog.append(this, "WiFi disconnected")
         }
+        updateNotification()
+    }
 
-        override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
-            if (result.status.statusCode == ConnectionsStatusCodes.STATUS_OK) {
-                connectedEndpoints.add(endpointId)
-                AlertLog.d("Connected to endpoint: $endpointId (Total: ${connectedEndpoints.size})")
-                AlertLog.append(this@MeshService, "Connected: $endpointId")
-                updateNotification()
-
-                // Send current alert if available
-                currentAlert?.let { sendAlert(endpointId, it) }
-            } else {
-                AlertLog.d("Connection failed: ${result.status.statusMessage}")
-            }
-        }
-
-        override fun onDisconnected(endpointId: String) {
-            connectedEndpoints.remove(endpointId)
-            AlertLog.d("Disconnected from: $endpointId (Remaining: ${connectedEndpoints.size})")
-            AlertLog.append(this@MeshService, "Disconnected: $endpointId")
-            updateNotification()
+    override fun onDeviceChanged(device: WifiP2pDevice?) {
+        device?.let {
+            AlertLog.d("WiFi Direct device changed: ${it.deviceName}")
         }
     }
 
-    private val discoveryCallback = object : EndpointDiscoveryCallback() {
-        override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
-            AlertLog.d("Discovered device: ${info.endpointName}")
-            discoveredEndpoints.add(endpointId)
-            updateNotification()
-
-            // Auto-connect to discovered endpoints
-            if (!connectedEndpoints.contains(endpointId)) {
-                connections.requestConnection(deviceName, endpointId, connectionLifecycle)
-                    .addOnSuccessListener {
-                        AlertLog.d("Requested connection to ${info.endpointName}")
-                    }
-                    .addOnFailureListener { e ->
-                        AlertLog.e("Failed to request connection: ${e.message}")
-                    }
+    override fun onDataReceived(data: ByteArray, fromAddress: String) {
+        try {
+            val alert = AlertCodec.decode(data)
+            if (alert != null) {
+                AlertLog.d("Received alert via WiFi Direct from $fromAddress")
+                handleIncomingAlert(alert)
             }
+        } catch (e: Exception) {
+            AlertLog.e("Failed to decode received data: ${e.message}")
         }
+    }
 
-        override fun onEndpointLost(endpointId: String) {
-            discoveredEndpoints.remove(endpointId)
-            AlertLog.d("Lost endpoint: $endpointId")
-            updateNotification()
+    override fun onDataSent(success: Boolean, toAddress: String) {
+        if (success) {
+            AlertLog.d("Alert sent successfully via WiFi Direct to $toAddress")
+            AlertLog.append(this, "Sent to $toAddress")
+        } else {
+            AlertLog.e("Failed to send alert via WiFi Direct to $toAddress")
         }
     }
 
     private fun relayAlert(alert: DisasterAlert) {
         currentAlert = alert
-        // Send to all connected endpoints
-        connectedEndpoints.forEach { endpointId ->
-            sendAlert(endpointId, alert)
+        
+        // Send via WiFi Direct if connected
+        if (isWiFiDirectActive) {
+            val alertData = AlertCodec.encode(alert)
+            wifiDirectManager.sendData(alertData)
+            AlertLog.d("Relaying alert ${alert.alertId} via WiFi Direct")
+            AlertLog.append(this, "Relayed alert ${alert.alertId} via WiFi Direct")
+        } else {
+            AlertLog.d("No WiFi Direct connection available for alert relay")
         }
-        AlertLog.d("Relaying alert ${alert.alertId} to ${connectedEndpoints.size} devices")
-        AlertLog.append(this, "Relayed alert ${alert.alertId} to ${connectedEndpoints.size} devices")
     }
 
-    private fun sendAlert(endpointId: String, alert: DisasterAlert) {
-        val bytes = AlertCodec.encode(alert)
-        connections.sendPayload(endpointId, Payload.fromBytes(bytes))
-            .addOnSuccessListener {
-                AlertLog.d("Sent alert ${alert.alertId} to $endpointId")
-                AlertLog.append(this, "Sent alert ${alert.alertId} to $endpointId")
-            }
-            .addOnFailureListener { e ->
-                AlertLog.e("Failed to send alert: ${e.message}")
-                AlertLog.append(this, "Failed to send to $endpointId: ${e.message}")
-            }
+    private fun tryWiFiDirectConnection(bluetoothDevice: BluetoothDevice) {
+        // When we discover a device via Bluetooth LE, we can try to establish
+        // a WiFi Direct connection for actual data transfer
+        // This is a simplified approach - in practice you might want to exchange
+        // WiFi Direct device info via Bluetooth LE first
+        
+        AlertLog.d("Attempting WiFi Direct connection for BLE device: ${bluetoothDevice.address}")
+        
+        val wifiPeers = wifiDirectManager.getPeers()
+        if (wifiPeers.isNotEmpty()) {
+            // Try to connect to the first available WiFi Direct peer
+            wifiDirectManager.connectToPeer(wifiPeers.first())
+        } else {
+            // Start WiFi Direct discovery to find peers
+            wifiDirectManager.startDiscovery()
+        }
     }
 
     private fun handleIncomingAlert(alert: DisasterAlert) {
@@ -458,11 +477,18 @@ class MeshService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        isAdvertising = false
-        isDiscovering = false
-        connections.stopAdvertising()
-        connections.stopDiscovery()
-        connections.stopAllEndpoints()
+        
+        // Cleanup Bluetooth LE
+        bluetoothLeManager.stopAdvertising()
+        bluetoothLeManager.stopScanning()
+        
+        // Cleanup WiFi Direct
+        wifiDirectManager.disconnect()
+        wifiDirectManager.cleanup()
+        
+        isBluetoothActive = false
+        isWiFiDirectActive = false
+        
         AlertLog.d("MeshService destroyed")
     }
 }

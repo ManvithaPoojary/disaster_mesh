@@ -65,8 +65,9 @@ DisasterMesh operates in emergency scenarios where:
 - Users should be aware of location sharing implications
 
 #### Network Security
-- Mesh network uses Google Nearby Connections API
-- Communications are encrypted by the underlying API
+- Mesh network uses Bluetooth LE for discovery and WiFi Direct for data transfer
+- Bluetooth LE advertising is limited to nearby devices (typically <100m)
+- WiFi Direct connections use WPA2 encryption
 - Network discovery is limited to nearby devices
 
 #### Role-Based Access

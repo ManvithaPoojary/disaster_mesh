@@ -7,9 +7,9 @@ DisasterMesh is an Android application that creates a decentralized mesh network
 ## 📱 Features
 
 ### 🌐 **Mesh Networking**
-- **Peer-to-peer communication** using Google Nearby Connections API
+- **Peer-to-peer communication** using Bluetooth LE + WiFi Direct
 - **Offline functionality** - works without internet connectivity
-- **Auto-discovery** of nearby devices running DisasterMesh
+- **Auto-discovery** of nearby devices using Bluetooth LE
 - **Message relay** - extends communication range through device hopping
 
 ### 🗺️ **Interactive Map**
@@ -42,7 +42,7 @@ DisasterMesh is an Android application that creates a decentralized mesh network
 - **Language**: Kotlin
 - **UI Framework**: Material Design 3
 - **Maps**: OpenStreetMap (osmdroid)
-- **Networking**: Google Nearby Connections API
+- **Networking**: Bluetooth LE + WiFi Direct
 - **Location**: Google Play Services Location API
 - **Push Notifications**: Firebase Cloud Messaging
 - **Architecture**: MVVM with Android Architecture Components
@@ -94,7 +94,7 @@ signingConfigs {
 ```
 
 #### **Admin Access**
-Default admin password: `DisasterMesh2024!Emergency` (MUST be changed in production)
+Default admin password: `DisasterResponse2024!Secure` (MUST be changed in production)
 ⚠️ **SECURITY WARNING**: Change admin authentication before public deployment
 Location: `MapsFragment.kt` - `verifyAdminPassword()` method
 
@@ -102,13 +102,15 @@ Location: `MapsFragment.kt` - `verifyAdminPassword()` method
 
 ### **Essential Permissions**
 - `ACCESS_FINE_LOCATION` - For location services and map centering
+- `NEARBY_WIFI_DEVICES` - For WiFi Direct discovery (Android 13+)
 - `BLUETOOTH_ADVERTISE` - For mesh network advertising (Android 12+)
 - `BLUETOOTH_SCAN` - For discovering nearby devices (Android 12+)
 - `BLUETOOTH_CONNECT` - For establishing connections (Android 12+)
+- `CHANGE_WIFI_STATE` - For WiFi Direct connections
+- `CHANGE_NETWORK_STATE` - For WiFi Direct group management
 
 ### **Optional Permissions**
 - `POST_NOTIFICATIONS` - For emergency alert notifications (Android 13+)
-- `NEARBY_WIFI_DEVICES` - For enhanced device discovery (Android 13+)
 
 ## 🎯 **Usage**
 
@@ -185,7 +187,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 **Acknowledgments**
 
 - **OpenStreetMap** for providing free map data
-- **Google** for Nearby Connections API and Play Services
+- **Google** for Play Services Location API
 - **Firebase** for cloud messaging services
 - **Material Design** for UI/UX guidelines
 - **OSMDroid** for Android map implementation

@@ -115,6 +115,7 @@ class MainActivity : AppCompatActivity() {
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.BLUETOOTH_ADVERTISE,
                     Manifest.permission.BLUETOOTH_SCAN,
+                    // Android 13+
                     Manifest.permission.NEARBY_WIFI_DEVICES
                 )
             }
@@ -179,8 +180,9 @@ class MainActivity : AppCompatActivity() {
         if (meshServiceStarted) return
 
         try {
-            val intent = Intent(this, MeshService::class.java).apply {
-                action = MeshService.ACTION_START_BROADCASTING
+            // Use MeshService for robust BLE + WiFi Direct networking
+            val intent = Intent(this, com.example.disastermesh.mesh.MeshService::class.java).apply {
+                action = com.example.disastermesh.mesh.MeshService.ACTION_START_BROADCASTING
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -264,6 +266,8 @@ class MainActivity : AppCompatActivity() {
             ))
         }
 
+
+
         if (Build.VERSION.SDK_INT >= 33) {
             requiredPermissions.add(Manifest.permission.NEARBY_WIFI_DEVICES)
         }
@@ -302,9 +306,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Nearby WiFi permission (required for Nearby on Android 13+)
+
+        
+        // WiFi Direct - Android 13+
         if (Build.VERSION.SDK_INT >= 33) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.NEARBY_WIFI_DEVICES) != PackageManager.PERMISSION_GRANTED) {
+             if (ContextCompat.checkSelfPermission(this, Manifest.permission.NEARBY_WIFI_DEVICES) != PackageManager.PERMISSION_GRANTED) {
                 needed += Manifest.permission.NEARBY_WIFI_DEVICES
             }
         }
