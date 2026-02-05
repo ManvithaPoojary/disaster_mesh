@@ -21,7 +21,10 @@ out/
 .gradle/
 build/
 caches/
-gradle/
+daemon/
+kotlin-profile/
+native/
+wrapper/
 gradlew
 gradlew.bat
 gradle-wrapper.jar
@@ -42,19 +45,9 @@ proguard/
 # Android Studio captures folder
 captures/
 
-# IntelliJ
+# IntelliJ - Complete IDE exclusion
+.idea/
 *.iml
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/gradle.xml
-.idea/assetWizardSettings.xml
-.idea/dictionaries
-.idea/libraries
-# Android Studio 3 in .gitignore file.
-.idea/caches
-.idea/modules.xml
-# Comment next line if keeping position of elements in Navigation Editor is relevant for you
-.idea/navEditor.xml
 
 # Keystore files
 # Uncomment the following lines if you do not want to check your keystore files in.
@@ -150,3 +143,13 @@ node_modules/
 
 # Optional eslint cache
 .eslintcache
+
+# Development and internal documentation
+docs/internal/
+*-INTERNAL.md
+*-DEBUG.md
+*-TEMP.md
+
+# Release assets (use GitHub releases instead)
+releases/
+*.apk

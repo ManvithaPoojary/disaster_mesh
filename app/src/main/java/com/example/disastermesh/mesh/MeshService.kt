@@ -204,6 +204,9 @@ class MeshService : Service(), BluetoothLeManager.BluetoothLeCallback, WiFiDirec
         super.onCreate()
         authorityManager = AuthorityManager(this)
         
+        // Set Bluetooth device name for discovery
+        setBluetoothDeviceName()
+        
         // Initialize managers
         bluetoothLeManager = BluetoothLeManager(this, this)
         wifiDirectManager = WiFiDirectManager(this, this)
@@ -283,16 +286,23 @@ class MeshService : Service(), BluetoothLeManager.BluetoothLeCallback, WiFiDirec
         // Start Bluetooth LE for device discovery
         if (bluetoothLeManager.isBluetoothEnabled() && bluetoothLeManager.isBluetoothLeSupported()) {
             if (bluetoothLeManager.startAdvertising()) {
-                AlertLog.d("Bluetooth LE advertising started")
+                AlertLog.d("BLE advertising started")
                 AlertLog.append(this, "BLE advertising started")
+            } else {
+                AlertLog.e("Failed to start BLE advertising")
+                AlertLog.append(this, "BLE advertising failed")
             }
             
             if (bluetoothLeManager.startScanning()) {
-                AlertLog.d("Bluetooth LE scanning started")
+                AlertLog.d("BLE scanning started")
                 AlertLog.append(this, "BLE scanning started")
+            } else {
+                AlertLog.e("Failed to start BLE scanning")
+                AlertLog.append(this, "BLE scanning failed")
             }
         } else {
             AlertLog.e("Bluetooth LE not available")
+            AlertLog.append(this, "BLE not available")
         }
 
         // Initialize WiFi Direct for data transfer
@@ -300,9 +310,38 @@ class MeshService : Service(), BluetoothLeManager.BluetoothLeCallback, WiFiDirec
             if (wifiDirectManager.startDiscovery()) {
                 AlertLog.d("WiFi Direct discovery started")
                 AlertLog.append(this, "WiFi Direct discovery started")
+            } else {
+                AlertLog.e("Failed to start WiFi Direct discovery")
+                AlertLog.append(this, "WiFi Direct discovery failed")
             }
         } else {
             AlertLog.e("WiFi Direct not available")
+            AlertLog.append(this, "WiFi Direct not available")
+        }
+    }
+
+    private fun setBluetoothDeviceName() {
+        try {
+            val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            val bluetoothAdapter = bluetoothManager.adapter
+            
+            if (bluetoothAdapter != null && bluetoothAdapter.isEnabled) {
+                // Check permissions before setting name
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                    if (androidx.core.app.ActivityCompat.checkSelfPermission(
+                            this, 
+                            android.Manifest.permission.BLUETOOTH_CONNECT
+                        ) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                        bluetoothAdapter.name = deviceName
+                        AlertLog.d("Bluetooth device name set to: $deviceName")
+                    }
+                } else {
+                    bluetoothAdapter.name = deviceName
+                    AlertLog.d("Bluetooth device name set to: $deviceName")
+                }
+            }
+        } catch (e: Exception) {
+            AlertLog.e("Failed to set Bluetooth device name: ${e.message}")
         }
     }
 

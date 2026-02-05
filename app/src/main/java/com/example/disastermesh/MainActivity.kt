@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.BLUETOOTH_ADVERTISE,
                     Manifest.permission.BLUETOOTH_SCAN,
-                    // Android 13+
+                    Manifest.permission.BLUETOOTH_CONNECT,
                     Manifest.permission.NEARBY_WIFI_DEVICES
                 )
             }
@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity() {
             if (criticalDenied) {
                 Snackbar.make(
                     binding.root,
-                    "Mesh network requires location and Bluetooth permissions to function",
+                    "Mesh network requires location and Bluetooth permissions for automatic discovery",
                     Snackbar.LENGTH_LONG
                 ).setAction("Grant") {
                     ensurePermissions()
@@ -133,6 +133,7 @@ class MainActivity : AppCompatActivity() {
                 startMeshService()
                 showMeshStatus("Mesh network starting (limited features)...")
             }
+            hideLoadingOverlay()
         }
     }
 
@@ -180,7 +181,7 @@ class MainActivity : AppCompatActivity() {
         if (meshServiceStarted) return
 
         try {
-            // Use MeshService for robust BLE + WiFi Direct networking
+            // Use MeshService for automatic WiFi Direct + BLE discovery
             val intent = Intent(this, com.example.disastermesh.mesh.MeshService::class.java).apply {
                 action = com.example.disastermesh.mesh.MeshService.ACTION_START_BROADCASTING
             }
@@ -193,12 +194,7 @@ class MainActivity : AppCompatActivity() {
 
             meshServiceStarted = true
 
-            // Create initial presence broadcast after a short delay
-            handler.postDelayed({
-                broadcastPresence()
-            }, 2000)
-
-            showMeshStatus("Mesh network active - visible to nearby devices")
+            showMeshStatus("Mesh network active - discovering nearby devices...")
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -266,8 +262,6 @@ class MainActivity : AppCompatActivity() {
             ))
         }
 
-
-
         if (Build.VERSION.SDK_INT >= 33) {
             requiredPermissions.add(Manifest.permission.NEARBY_WIFI_DEVICES)
         }
@@ -287,12 +281,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Location permission (required for Nearby)
+        // Location permission (required for WiFi Direct and BLE)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             needed += Manifest.permission.ACCESS_FINE_LOCATION
         }
 
-        // Bluetooth permissions (required for Nearby on Android 12+)
+        // Bluetooth permissions (required for BLE on Android 12+)
         if (Build.VERSION.SDK_INT >= 31) {
             val btPerms = listOf(
                 Manifest.permission.BLUETOOTH_SCAN,
@@ -306,8 +300,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
-        
         // WiFi Direct - Android 13+
         if (Build.VERSION.SDK_INT >= 33) {
              if (ContextCompat.checkSelfPermission(this, Manifest.permission.NEARBY_WIFI_DEVICES) != PackageManager.PERMISSION_GRANTED) {

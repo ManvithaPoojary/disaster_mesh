@@ -61,10 +61,16 @@ class BluetoothLeManager(
                 val device = scanResult.device
                 val deviceName = getDeviceName(scanResult)
                 
+                // Log all discovered devices for debugging
+                AlertLog.d("BLE scan result: $deviceName (${device.address})")
+                
                 if (deviceName.startsWith(DEVICE_NAME_PREFIX) && !discoveredDevices.contains(device)) {
                     discoveredDevices.add(device)
                     AlertLog.d("Discovered DisasterMesh device: $deviceName")
                     callback.onDeviceDiscovered(device, deviceName)
+                } else if (deviceName != "Unknown") {
+                    // Log non-DisasterMesh devices for debugging
+                    AlertLog.d("Non-DisasterMesh device found: $deviceName")
                 }
             }
         }
@@ -125,16 +131,14 @@ class BluetoothLeManager(
             .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
             .build()
 
-        val filters = listOf(
-            ScanFilter.Builder()
-                .setServiceUuid(ParcelUuid(SERVICE_UUID))
-                .build()
-        )
+        // Scan for all devices, not just our service UUID
+        // This is more reliable for discovery
+        val filters = emptyList<ScanFilter>()
 
         try {
             bluetoothLeScanner.startScan(filters, settings, scanCallback)
             isScanning = true
-            AlertLog.d("BLE scanning started")
+            AlertLog.d("BLE scanning started (all devices)")
             callback.onScanStarted()
             return true
         } catch (e: Exception) {
@@ -187,6 +191,15 @@ class BluetoothLeManager(
     }
 
     private fun getDeviceName(scanResult: ScanResult): String {
+        // Try to get device name from scan record first
+        val scanRecord = scanResult.scanRecord
+        val localName = scanRecord?.deviceName
+        
+        if (!localName.isNullOrEmpty()) {
+            return localName
+        }
+        
+        // Fallback to device name if permissions allow
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
                 scanResult.device.name ?: "Unknown"

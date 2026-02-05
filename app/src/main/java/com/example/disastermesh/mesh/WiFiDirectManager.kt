@@ -124,16 +124,22 @@ class WiFiDirectManager(
 
     fun startDiscovery(): Boolean {
         if (channel == null || !hasWiFiDirectPermissions()) {
+            AlertLog.e("Cannot start WiFi Direct discovery: missing permissions or not initialized")
             return false
         }
 
         wifiP2pManager.discoverPeers(channel, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
-                AlertLog.d("WiFi Direct discovery started")
+                AlertLog.d("WiFi Direct discovery started successfully")
             }
 
             override fun onFailure(reason: Int) {
                 AlertLog.e("WiFi Direct discovery failed: $reason")
+                // Retry after a delay
+                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                    AlertLog.d("Retrying WiFi Direct discovery...")
+                    startDiscovery()
+                }, 5000)
             }
         })
         return true
