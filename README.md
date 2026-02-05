@@ -29,15 +29,15 @@ This project focuses on **resilience**, **decentralization**, and **real-world e
 
 ### 🚨 Emergency Alert System
 <div align="center">
-  <img src="docs/screenshots/sos-emergency-dialog.png" alt="SOS Emergency Dialog - User Mode" width="300"/>
-  <img src="docs/screenshots/admin-broadcast-dialog.png" alt="Admin Broadcast Dialog" width="300"/>
+  <img src="docs/screenshots/sos-emergency-dialog.jpeg" alt="SOS Emergency Dialog - User Mode" width="300"/>
+  <img src="docs/screenshots/admin-broadcast-dialog.jpeg" alt="Admin Broadcast Dialog" width="300"/>
 </div>
 
 *Emergency alert creation: User SOS signal (left) → Admin broadcast (right) with risk level selection*
 
 ### 🗺️ Emergency Map Interface
 <div align="center">
-  <img src="docs/screenshots/emergency-map-with-alerts.png" alt="Emergency Map with Multiple Alerts" width="400"/>
+  <img src="docs/screenshots/emergency-map-with-alerts.jpeg" alt="Emergency Map with Multiple Alerts" width="400"/>
 </div>
 
 *Real-time emergency map showing multiple alert locations, mesh network status, and OpenStreetMap integration*
