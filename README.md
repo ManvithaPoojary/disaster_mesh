@@ -25,7 +25,7 @@ This project focuses on **resilience**, **decentralization**, and **real-world e
 - **📱 Material Design UI** optimized for Android
 - **⚡ No internet, no servers, no accounts** required
 
-## 📱 App Screenshots & Demo
+## 📱 App Screenshots
 
 ### 🚨 Emergency Alert System
 <div align="center">
@@ -41,24 +41,6 @@ This project focuses on **resilience**, **decentralization**, and **real-world e
 </div>
 
 *Real-time emergency map showing multiple alert locations, mesh network status, and OpenStreetMap integration*
-
-### 🔑 Key Features Demonstrated
-- **✅ Material Design 3** - Modern dark theme optimized for emergency use
-- **✅ Role-based Access** - Clear User/Admin mode switching with visual indicators
-- **✅ Risk Level Classification** - Color-coded severity (Low/Medium/High/Critical)
-- **✅ Location Integration** - GPS coordinates with "Use Current Location" button
-- **✅ Mesh Network Status** - Real-time connection status display
-- **✅ Professional UI** - Large buttons and clear layouts for stress situations
-
----
-
-> **📸 Screenshot Details:**
-> 
-> These screenshots show DisasterMesh running on Android with:
-> - **User Mode**: SOS signal creation with location and risk level selection
-> - **Admin Mode**: Emergency broadcast with authority-level controls
-> - **Map View**: Real-world emergency alerts displayed on OpenStreetMap
-> - **Mesh Status**: Network connectivity and device discovery indicators
 
 ## 🛠️ Tech Stack
 
