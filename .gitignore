@@ -149,7 +149,3 @@ docs/internal/
 *-INTERNAL.md
 *-DEBUG.md
 *-TEMP.md
-
-# Release assets (use GitHub releases instead)
-releases/
-*.apk

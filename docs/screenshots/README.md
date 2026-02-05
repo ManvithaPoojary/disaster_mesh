@@ -1,46 +1,75 @@
-# DisasterMesh Screenshots
+# 📸 DisasterMesh Screenshots
 
-This directory contains app screenshots for the README and documentation.
+This directory contains app screenshots for documentation and marketing materials.
 
-## Required Screenshots
+## 🖼️ Current Screenshots
 
-### Main Interface (3 images)
-- `main-interface-light.png` - Main app in light mode
-- `main-interface-dark.png` - Main app in dark mode  
-- `emergency-map.png` - Map view with location and alerts
+### **Emergency Alert System**
+- `sos-emergency-dialog.png` - User mode SOS signal creation dialog
+- `admin-broadcast-dialog.png` - Admin mode emergency broadcast interface
 
-### SOS Flow (4 images)
-- `sos-button.png` - Red SOS emergency button
-- `sos-confirmation.png` - SOS confirmation dialog
-- `sos-sent.png` - SOS alert sent notification
-- `sos-received.png` - SOS alert received on another device
+### **Map Interface**
+- `emergency-map-with-alerts.png` - Main map showing multiple emergency alerts
 
-### Mesh Status (3 images)
-- `mesh-connecting.png` - Mesh network connecting state
-- `mesh-connected.png` - Active mesh connections
-- `mesh-debug.png` - Debug information dialog
+## 📱 Screenshot Details
 
-### Admin Features (4 images)
-- `admin-login.png` - Admin authentication dialog
-- `admin-broadcast.png` - Admin broadcast creation
-- `risk-levels.png` - Risk level selection (Low/Medium/High/Critical)
-- `broadcast-sent.png` - Broadcast alert sent confirmation
+### **SOS Emergency Dialog (User Mode)**
+- **Features**: User role badge, location input, risk level selection
+- **UI Elements**: Material Design 3 dark theme, large touch targets
+- **Functionality**: GPS integration, radius setting, emergency classification
 
-### Network Visualization (2 images)
-- `network-topology.png` - Mesh network topology diagram
-- `alert-propagation.png` - Alert propagation visualization
+### **Admin Broadcast Dialog**
+- **Features**: Admin role badge, authority-level controls
+- **UI Elements**: Professional admin interface, role switching
+- **Functionality**: Official emergency broadcasts, risk level management
 
-## Capture Instructions
+### **Emergency Map with Alerts**
+- **Features**: OpenStreetMap integration, multiple alert markers
+- **UI Elements**: Real-time location display, mesh network status
+- **Functionality**: Emergency visualization, network connectivity
 
-1. **Setup**: Install app on 2+ Android devices
-2. **Pair**: Connect devices via Bluetooth settings
-3. **Test**: Open app and test all features
-4. **Capture**: Use `adb shell screencap -p /sdcard/screenshot.png`
-5. **Transfer**: `adb pull /sdcard/screenshot.png`
+## 🎯 Usage Guidelines
 
-## Image Specifications
+### **For README.md**
+These screenshots demonstrate:
+- Professional Material Design 3 implementation
+- Role-based access control (User/Admin)
+- Emergency-focused UI design
+- Real-world mapping integration
+- Mesh network functionality
 
-- **Format**: PNG (for screenshots), GIF (for demos)
-- **Size**: Mobile screenshots should be 250-400px wide
-- **Quality**: High resolution, clear text
-- **Naming**: Use descriptive kebab-case names
+### **For Marketing**
+Key selling points shown:
+- Intuitive emergency interface
+- Professional admin controls
+- Real-world disaster scenarios
+- Technical sophistication
+- Practical usability
+
+## 📋 File Naming Convention
+
+Use descriptive, kebab-case names:
+- `feature-description-context.png`
+- Example: `sos-emergency-dialog.png`
+
+## 🔄 Future Screenshots Needed
+
+### **Admin Authentication**
+- Admin password dialog
+- Security access control
+
+### **Mesh Network Status**
+- Connected devices list
+- Network topology visualization
+
+### **Alert Notifications**
+- Received emergency alerts
+- Notification system
+
+### **Settings & Permissions**
+- Bluetooth/location permissions
+- App configuration screens
+
+---
+
+**These screenshots showcase DisasterMesh as a professional, production-ready emergency communication solution!** 🚨📱

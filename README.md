@@ -1,178 +1,111 @@
 # 🚨 DisasterMesh
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/yourusername/DisasterMesh)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/raviprasad794063/disaster_mesh)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://android.com)
 [![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=24)
-[![Release](https://img.shields.io/badge/release-v1.0.0-blue)](https://github.com/yourusername/DisasterMesh/releases/tag/v1.0.0)
-[![Downloads](https://img.shields.io/badge/downloads-1k%2B-blue)](https://github.com/yourusername/DisasterMesh/releases)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.24-blue.svg)](https://kotlinlang.org)
 
-**Emergency mesh communication when networks fail.**
+**Offline Emergency Mesh Communication for Disaster Scenarios**
 
-DisasterMesh creates a decentralized Bluetooth mesh network for emergency communication during disasters when cellular towers and internet infrastructure are compromised.
+DisasterMesh is an Android-based peer-to-peer mesh networking application designed to enable communication when cellular networks and the internet are unavailable. It allows nearby devices to form a decentralized mesh using Bluetooth and Wi-Fi Direct, enabling emergency messaging and SOS alerts during disasters.
 
-## 🎯 Problem Statement
+## 🌍 Why DisasterMesh?
 
-When disasters strike, traditional communication networks fail first. Emergency responders and civilians lose contact exactly when coordination matters most. DisasterMesh solves this by creating an **offline peer-to-peer emergency network** using only the devices people already carry.
+During natural disasters, riots, or remote-area emergencies, traditional communication infrastructure often fails. DisasterMesh enables people to stay connected without relying on the internet, servers, or mobile networks.
 
-## ⚡ What It Does
+This project focuses on **resilience**, **decentralization**, and **real-world emergency usability**.
 
-- **🔴 SOS Alerts**: Send emergency signals that automatically relay through nearby devices
-- **📍 Location Sharing**: Real-time emergency mapping with offline OpenStreetMap
-- **📢 Authority Broadcasts**: Official emergency information distribution
-- **🔗 Mesh Relay**: Extends communication range through device-to-device hopping
-- **🌙 Works Offline**: Zero internet or cellular dependency
+## 🔑 Key Features
+
+- **📡 Offline mesh networking** using Bluetooth & Wi-Fi Direct
+- **🆘 SOS broadcast messages** to nearby devices
+- **🔁 Multi-hop message relaying** across devices
+- **🗺️ Map-based UI** with location awareness
+- **📱 Material Design UI** optimized for Android
+- **⚡ No internet, no servers, no accounts** required
 
 ## 📱 App Screenshots & Demo
 
-### 🖼️ Main Interface
+### 🚨 Emergency Alert System
 <div align="center">
-  <img src="docs/screenshots/main-interface-light.png" alt="Main Interface - Light Mode" width="250"/>
-  <img src="docs/screenshots/main-interface-dark.png" alt="Main Interface - Dark Mode" width="250"/>
-  <img src="docs/screenshots/emergency-map.png" alt="Emergency Map View" width="250"/>
+  <img src="docs/screenshots/sos-emergency-dialog.png" alt="SOS Emergency Dialog - User Mode" width="300"/>
+  <img src="docs/screenshots/admin-broadcast-dialog.png" alt="Admin Broadcast Dialog" width="300"/>
 </div>
 
-*Main app interface showing emergency map with location detection, SOS button, and role switching*
+*Emergency alert creation: User SOS signal (left) → Admin broadcast (right) with risk level selection*
 
-### 🚨 Emergency SOS Flow
+### 🗺️ Emergency Map Interface
 <div align="center">
-  <img src="docs/screenshots/sos-button.png" alt="SOS Button" width="200"/>
-  <img src="docs/screenshots/sos-confirmation.png" alt="SOS Confirmation" width="200"/>
-  <img src="docs/screenshots/sos-sent.png" alt="SOS Alert Sent" width="200"/>
-  <img src="docs/screenshots/sos-received.png" alt="SOS Alert Received" width="200"/>
+  <img src="docs/screenshots/emergency-map-with-alerts.png" alt="Emergency Map with Multiple Alerts" width="400"/>
 </div>
 
-*Complete SOS emergency flow: button press → confirmation → alert sent → received on nearby devices*
+*Real-time emergency map showing multiple alert locations, mesh network status, and OpenStreetMap integration*
 
-### 🔗 Mesh Network Status
-<div align="center">
-  <img src="docs/screenshots/mesh-connecting.png" alt="Mesh Connecting" width="250"/>
-  <img src="docs/screenshots/mesh-connected.png" alt="Mesh Connected" width="250"/>
-  <img src="docs/screenshots/mesh-debug.png" alt="Mesh Debug Info" width="250"/>
-</div>
-
-*Mesh network status: connecting to peers → active connections → debug information*
-
-### 📢 Admin Broadcasting
-<div align="center">
-  <img src="docs/screenshots/admin-login.png" alt="Admin Login" width="200"/>
-  <img src="docs/screenshots/admin-broadcast.png" alt="Admin Broadcast" width="200"/>
-  <img src="docs/screenshots/risk-levels.png" alt="Risk Level Selection" width="200"/>
-  <img src="docs/screenshots/broadcast-sent.png" alt="Broadcast Sent" width="200"/>
-</div>
-
-*Admin workflow: authentication → broadcast creation → risk level selection → alert distribution*
-
-### 🎬 Live Demo GIF
-<div align="center">
-  <img src="docs/demo/disaster-mesh-demo.gif" alt="DisasterMesh Live Demo" width="600"/>
-</div>
-
-*30-second demo showing device pairing, SOS alert, and mesh relay in action*
-
-### 📊 Network Visualization
-<div align="center">
-  <img src="docs/screenshots/network-topology.png" alt="Mesh Network Topology" width="400"/>
-  <img src="docs/screenshots/alert-propagation.png" alt="Alert Propagation Map" width="400"/>
-</div>
-
-*Visual representation of mesh network topology and alert propagation patterns*
+### 🔑 Key Features Demonstrated
+- **✅ Material Design 3** - Modern dark theme optimized for emergency use
+- **✅ Role-based Access** - Clear User/Admin mode switching with visual indicators
+- **✅ Risk Level Classification** - Color-coded severity (Low/Medium/High/Critical)
+- **✅ Location Integration** - GPS coordinates with "Use Current Location" button
+- **✅ Mesh Network Status** - Real-time connection status display
+- **✅ Professional UI** - Large buttons and clear layouts for stress situations
 
 ---
 
-> **📸 Screenshot Instructions for Contributors:**
+> **📸 Screenshot Details:**
 > 
-> To capture these screenshots:
-> 1. Install app on 2+ Android devices
-> 2. Pair devices via Bluetooth settings  
-> 3. Open DisasterMesh on all devices
-> 4. Test SOS alerts and admin broadcasts
-> 5. Capture screens using `adb shell screencap` or device screenshot
-> 6. Save to `docs/screenshots/` directory
-> 
-> **GIF Recording:**
-> - Use `scrcpy` + screen recorder for smooth demo GIFs
-> - Keep demos under 30 seconds for fast loading
-> - Show key user flows: pairing → SOS → alert received
+> These screenshots show DisasterMesh running on Android with:
+> - **User Mode**: SOS signal creation with location and risk level selection
+> - **Admin Mode**: Emergency broadcast with authority-level controls
+> - **Map View**: Real-world emergency alerts displayed on OpenStreetMap
+> - **Mesh Status**: Network connectivity and device discovery indicators
 
 ## 🛠️ Tech Stack
 
-**Core:**
-- **Kotlin** - Primary language
-- **Android SDK 24+** - Target platform
-- **Material Design 3** - Modern UI framework
+- **Language**: Kotlin
+- **Platform**: Android
+- **Networking**: Bluetooth, Wi-Fi Direct
+- **Maps**: OpenStreetMap
+- **Architecture**: Modular & scalable mesh layers
+- **UI**: Material Design Components
 
-**Networking:**
-- **Bluetooth Classic** - Reliable mesh communication
-- **Custom Mesh Protocol** - Alert relay and discovery
+## 🚀 Getting Started
 
-**Maps & Location:**
-- **OpenStreetMap (osmdroid)** - Offline mapping
-- **Google Play Services Location** - GPS positioning
-
-**Additional:**
-- **Firebase Cloud Messaging** - Push notifications
-- **MVVM Architecture** - Clean code structure
-- **Coroutines** - Async operations
-
-## � Duownload & Install
-
-### 🚀 **Latest Release: v1.0.0**
-
-| Version | Size | Description | Download |
-|---------|------|-------------|----------|
-| **Release** | ~15MB | ✅ **Recommended** - Optimized for production | [📱 Download APK](https://github.com/yourusername/DisasterMesh/releases/download/v1.0.0/DisasterMesh-v1.0.0-release.apk) |
-| **Debug** | ~18MB | 🔧 For developers and testing | [🛠️ Download APK](https://github.com/yourusername/DisasterMesh/releases/download/v1.0.0/DisasterMesh-v1.0.0-debug.apk) |
-
-### 📋 **System Requirements**
-- **Android**: 7.0+ (API level 24+)
-- **Storage**: 25MB free space
-- **Hardware**: Bluetooth, GPS/Location services
-- **Network**: No internet required for core functionality
-
-### ⚡ **Quick Install**
-1. **Download APK** from links above
-2. **Enable "Install unknown apps"** in Android settings
-3. **Install APK** and grant permissions (Bluetooth, Location, Notifications)
-4. **Pair devices** via Android Bluetooth settings
-5. **Ready for emergency use!**
-
-> 📖 **Detailed Instructions**: See [Installation Guide](releases/README.md) for complete setup steps and troubleshooting.
-
-## 🚀 Quick Start
-
-**Prerequisites:** Android Studio, Android device with Bluetooth
-
+### Clone the repository
 ```bash
-# 1. Clone and build
-git clone https://github.com/yourusername/DisasterMesh.git
-cd DisasterMesh
-./gradlew assembleDebug
-
-# 2. Install on device
-adb install app/build/outputs/apk/debug/app-debug.apk
-
-# 3. Test mesh network
-# - Pair devices via Bluetooth settings
-# - Open app on both devices
-# - Send test SOS alert
+git clone https://github.com/raviprasad794063/disaster_mesh.git
+cd disaster_mesh
 ```
 
-**Ready in 3 minutes.** No server setup, no API keys, no cloud configuration.
+### Build the project
+```bash
+./gradlew assembleDebug
+```
 
-## 🌍 Why This Matters
+### Install on device
+```bash
+adb install app/build/outputs/apk/debug/app-debug.apk
+```
 
-**Real-World Impact:**
-- **Hurricane Katrina (2005)**: 3 million people lost communication for days
-- **Japan Tsunami (2011)**: Cell towers destroyed, families separated
-- **California Wildfires (2020)**: Power outages disabled emergency systems
-- **Ukraine Crisis (2022)**: Internet infrastructure targeted in conflicts
+⚠️ **Requires Bluetooth & Wi-Fi permissions enabled on the device.**
 
-**DisasterMesh provides:**
-- ✅ **Immediate deployment** - works on existing Android devices
-- ✅ **No infrastructure** - operates when everything else fails  
-- ✅ **Community resilience** - neighbors helping neighbors
-- ✅ **Emergency coordination** - first responders stay connected
+## 🧠 Architecture Overview
+
+DisasterMesh uses a decentralized mesh topology where each device can:
+
+- **Discover nearby peers**
+- **Relay messages for other nodes**
+- **Act independently without a central coordinator**
+
+This makes the system fault-tolerant and scalable in emergency conditions.
+
+## 🎯 Use Cases
+
+- **Natural disasters** (earthquakes, floods, cyclones)
+- **Network outages**
+- **Remote or rural areas**
+- **Emergency response coordination**
+- **Disaster preparedness drills**
 
 ## 📊 Performance
 
@@ -183,6 +116,16 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 | **Connection Time** | 5-15 seconds between paired devices |
 | **Supported Devices** | All Android 7.0+ devices |
 | **Offline Maps** | Full OpenStreetMap integration |
+
+## 🏷️ GitHub Topics
+
+To improve discoverability, add these topics to your GitHub repository:
+
+**Core Topics:** `android`, `kotlin`, `mesh-networking`, `p2p`, `bluetooth`, `wifi-direct`, `emergency-communication`, `disaster-response`, `offline-first`, `decentralized`
+
+**Additional:** `peer-to-peer`, `emergency-app`, `disaster-management`, `crisis-communication`, `mobile-mesh`, `humanitarian-tech`, `resilient-communication`, `emergency-preparedness`, `public-safety`, `offline-communication`
+
+> 📖 **How to Add**: Go to your GitHub repo → Click gear icon next to "About" → Add topics → Save changes. See [detailed guide](docs/internal/GITHUB_TOPICS_SETUP.md).
 
 ## 🔧 Development
 
@@ -211,9 +154,17 @@ We need help with:
 
 [Contributing Guidelines](CONTRIBUTING.md) | [Code of Conduct](CODE_OF_CONDUCT.md)
 
-## 📄 License
+## 📜 License
 
-MIT License - see [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
+
+## 👤 Author
+
+**Ravi Prasad**  
+Engineering Student | Android & Systems Enthusiast
+
+- GitHub: [@raviprasad794063](https://github.com/raviprasad794063)
+- Project: [disaster_mesh](https://github.com/raviprasad794063/disaster_mesh)
 
 ## ⚠️ Emergency Disclaimer
 
@@ -223,4 +174,4 @@ This app assists emergency communication but should not be your only emergency p
 
 **Built for emergency preparedness. Tested for when it matters most.**
 
-📱 [**Download v1.0.0**](https://github.com/yourusername/DisasterMesh/releases/tag/v1.0.0) | 🐛 [Report Issues](https://github.com/yourusername/DisasterMesh/issues) | 💬 [Join Discussion](https://github.com/yourusername/DisasterMesh/discussions) | 📚 [View All Releases](https://github.com/yourusername/DisasterMesh/releases)
+🐛 [Report Issues](https://github.com/raviprasad794063/disaster_mesh/issues) | 💬 [Join Discussion](https://github.com/raviprasad794063/disaster_mesh/discussions) | 🤝 [Contributing](CONTRIBUTING.md)
