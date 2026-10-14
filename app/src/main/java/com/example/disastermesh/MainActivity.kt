@@ -78,6 +78,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.IntentCompat
 import com.example.disastermesh.databinding.ActivityMainBinding
 import com.example.disastermesh.mesh.MeshService
 import com.example.disastermesh.model.DisasterAlert
@@ -167,7 +168,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleNotificationLaunch() {
         // If launched from notification with alert payload
-        val alert = intent.getParcelableExtra("alert", DisasterAlert::class.java)
+        val alert = IntentCompat.getParcelableExtra(intent, "alert", DisasterAlert::class.java)
         if (alert != null) {
             // Small delay to ensure fragment is ready
             handler.postDelayed({

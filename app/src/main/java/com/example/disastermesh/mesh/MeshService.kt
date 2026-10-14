@@ -163,6 +163,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.net.wifi.p2p.WifiP2pDevice
@@ -170,6 +171,7 @@ import android.net.wifi.p2p.WifiP2pGroup
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.core.content.IntentCompat
 import com.example.disastermesh.R
 import com.example.disastermesh.data.AuthorityManager
 import com.example.disastermesh.data.ProcessedAlerts
@@ -222,7 +224,7 @@ class MeshService : Service(), BluetoothLeManager.BluetoothLeCallback, WiFiDirec
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_RELAY_ALERT -> {
-                val alert = intent.getParcelableExtra(EXTRA_ALERT, DisasterAlert::class.java)
+                val alert = IntentCompat.getParcelableExtra(intent, EXTRA_ALERT, DisasterAlert::class.java)
                 if (alert != null) {
                     currentAlert = alert
                     relayAlert(alert)
@@ -332,11 +334,11 @@ class MeshService : Service(), BluetoothLeManager.BluetoothLeCallback, WiFiDirec
                             this, 
                             android.Manifest.permission.BLUETOOTH_CONNECT
                         ) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                        bluetoothAdapter.name = deviceName
+                        bluetoothAdapter.setName(deviceName)
                         AlertLog.d("Bluetooth device name set to: $deviceName")
                     }
                 } else {
-                    bluetoothAdapter.name = deviceName
+                    bluetoothAdapter.setName(deviceName)
                     AlertLog.d("Bluetooth device name set to: $deviceName")
                 }
             }
